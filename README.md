@@ -91,7 +91,7 @@ Format flag:
 Peserta submit:
 
 - semua flag sekaligus
-- 1 writeup (boleh per-challenge atau sekaligus)
+- 1 writeup (sekaligus)
 - nama peserta
 
 Submission via Google Form yang ada di website.
