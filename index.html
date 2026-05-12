@@ -1,288 +1,569 @@
 <!DOCTYPE html>
-<html>
+<html lang="id">
 <head>
-  <title>7CTF</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>7CTF 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@700;900&family=Inter:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --neon-green: #39ff14;
+    --neon-cyan: #00f5ff;
+    --neon-pink: #ff2d78;
+    --neon-yellow: #ffe600;
+    --bg: #080c10;
+    --surface: #0d1117;
+    --surface2: #121820;
+    --border: rgba(0,245,255,0.15);
+    --text: #c8d6e5;
+    --mono: 'Share Tech Mono', monospace;
+    --display: 'Orbitron', sans-serif;
+    --body: 'Inter', sans-serif;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--body);
+    font-size: 15px;
+    line-height: 1.7;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* scanline overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  /* grid bg */
+  body::after {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,0.03) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,0.03) 1px, transparent 1px);
+    background-size: 40px 40px;
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrapper {
+    position: relative;
+    z-index: 1;
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 24px 80px;
+  }
+
+  /* ── BANNER ── */
+  .banner {
+    text-align: center;
+    padding: 60px 0 40px;
+    position: relative;
+  }
+
+  .banner-meme {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(57,255,20,0.5);
+    letter-spacing: 2px;
+    margin-bottom: 16px;
+    animation: flicker 4s infinite;
+  }
+
+  .banner h1 {
+    font-family: var(--display);
+    font-size: clamp(42px, 10vw, 80px);
+    font-weight: 900;
+    color: var(--neon-cyan);
+    text-shadow: 0 0 20px rgba(0,245,255,0.6), 0 0 60px rgba(0,245,255,0.2);
+    letter-spacing: 6px;
+    line-height: 1;
+  }
+
+  .banner-year {
+    font-family: var(--display);
+    font-size: clamp(14px, 3vw, 20px);
+    color: var(--neon-pink);
+    letter-spacing: 8px;
+    text-shadow: 0 0 12px rgba(255,45,120,0.7);
+    margin-top: 6px;
+  }
+
+  .banner-tagline {
+    margin-top: 20px;
+    font-family: var(--mono);
+    font-size: 13px;
+    color: rgba(200,214,229,0.5);
+  }
+
+  /* ascii meme art */
+  .ascii-art {
+    font-family: var(--mono);
+    font-size: 10px;
+    line-height: 1.2;
+    color: rgba(57,255,20,0.3);
+    margin: 16px auto;
+    white-space: pre;
+    display: inline-block;
+    animation: flicker 6s 2s infinite;
+  }
+
+  .badge-row {
+    display: flex;
+    gap: 10px;
+    justify-content: center;
+    flex-wrap: wrap;
+    margin-top: 20px;
+  }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 4px 12px;
+    border-radius: 2px;
+    letter-spacing: 1px;
+  }
+
+  .badge-g { border: 1px solid var(--neon-green); color: var(--neon-green); background: rgba(57,255,20,0.06); }
+  .badge-c { border: 1px solid var(--neon-cyan); color: var(--neon-cyan); background: rgba(0,245,255,0.06); }
+  .badge-p { border: 1px solid var(--neon-pink); color: var(--neon-pink); background: rgba(255,45,120,0.06); }
+
+  /* ── SECTION TITLES ── */
+  .section-title {
+    font-family: var(--display);
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--neon-cyan);
+    text-transform: uppercase;
+    margin: 48px 0 16px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title::before {
+    content: '//';
+    color: var(--neon-green);
+    font-family: var(--mono);
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, rgba(0,245,255,0.3), transparent);
+  }
+
+  /* ── SCOREBOARD ── */
+  .scoreboard-wrap {
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--neon-cyan);
+    border-radius: 4px;
+    overflow: hidden;
+    background: var(--surface);
+    box-shadow: 0 0 30px rgba(0,245,255,0.05);
+  }
+
+  .scoreboard-wrap iframe {
+    display: block;
+    width: 100%;
+    height: 480px;
+    border: none;
+    filter: invert(1) hue-rotate(180deg) saturate(0.8);
+  }
+
+  /* ── SUBMIT FORM ── */
+  .submit-card {
+    border: 1px solid rgba(255,45,120,0.3);
+    border-top: 2px solid var(--neon-pink);
+    background: var(--surface);
+    border-radius: 4px;
+    padding: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+    flex-wrap: wrap;
+  }
+
+  .submit-card p {
+    color: rgba(200,214,229,0.7);
+    font-size: 13px;
+    font-family: var(--mono);
+    flex: 1;
+  }
+
+  .submit-card p span {
+    display: block;
+    font-size: 15px;
+    color: var(--text);
+    margin-bottom: 4px;
+    font-family: var(--body);
+    font-weight: 500;
+  }
+
+  .btn-submit {
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 2px;
+    color: var(--bg);
+    background: var(--neon-pink);
+    border: none;
+    padding: 12px 24px;
+    border-radius: 2px;
+    text-decoration: none;
+    text-transform: uppercase;
+    white-space: nowrap;
+    box-shadow: 0 0 20px rgba(255,45,120,0.4);
+    transition: box-shadow 0.2s, transform 0.1s;
+    display: inline-block;
+  }
+
+  .btn-submit:hover {
+    box-shadow: 0 0 35px rgba(255,45,120,0.7);
+    transform: translateY(-1px);
+  }
+
+  /* ── CHALLENGES ── */
+  .challenges-grid {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .challenge {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent-color, var(--neon-cyan));
+    border-radius: 4px;
+    padding: 20px 24px;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+    overflow: hidden;
+  }
+
+  .challenge::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(135deg, rgba(var(--accent-rgb, 0,245,255),0.03) 0%, transparent 60%);
+    pointer-events: none;
+  }
+
+  .challenge:hover {
+    border-color: rgba(var(--accent-rgb, 0,245,255),0.5);
+    box-shadow: 0 0 20px rgba(var(--accent-rgb, 0,245,255),0.08);
+  }
+
+  /* point-based color coding */
+  .pts-50  { --accent-color: #39ff14; --accent-rgb: 57,255,20; }
+  .pts-75  { --accent-color: #00f5ff; --accent-rgb: 0,245,255; }
+  .pts-100 { --accent-color: #00bfff; --accent-rgb: 0,191,255; }
+  .pts-125 { --accent-color: #ffe600; --accent-rgb: 255,230,0; }
+  .pts-150 { --accent-color: #ffa500; --accent-rgb: 255,165,0; }
+  .pts-175 { --accent-color: #ff6b35; --accent-rgb: 255,107,53; }
+  .pts-200 { --accent-color: #ff2d78; --accent-rgb: 255,45,120; }
+  .pts-225 { --accent-color: #d65aff; --accent-rgb: 214,90,255; }
+  .pts-250 { --accent-color: #ff4081; --accent-rgb: 255,64,129; }
+  .pts-300 { --accent-color: #ff2d78; --accent-rgb: 255,45,120; }
+
+  .challenge-header {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 12px;
+    margin-bottom: 10px;
+  }
+
+  .challenge-num {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: rgba(200,214,229,0.3);
+    position: absolute;
+    top: 20px;
+    right: 24px;
+  }
+
+  .pts-badge {
+    font-family: var(--display);
+    font-size: 11px;
+    font-weight: 700;
+    padding: 3px 10px;
+    border-radius: 2px;
+    border: 1px solid var(--accent-color);
+    color: var(--accent-color);
+    background: rgba(var(--accent-rgb),0.08);
+    white-space: nowrap;
+    text-shadow: 0 0 8px var(--accent-color);
+    letter-spacing: 1px;
+    flex-shrink: 0;
+  }
+
+  .challenge h2 {
+    font-family: var(--mono);
+    font-size: 14px;
+    font-weight: normal;
+    color: #e8f0fe;
+    line-height: 1.4;
+    flex: 1;
+  }
+
+  .challenge p {
+    font-size: 13px;
+    color: rgba(200,214,229,0.65);
+    line-height: 1.7;
+    margin-top: 8px;
+  }
+
+  .challenge a.dl-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 14px;
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--accent-color);
+    text-decoration: none;
+    border: 1px solid rgba(var(--accent-rgb),0.4);
+    padding: 6px 14px;
+    border-radius: 2px;
+    background: rgba(var(--accent-rgb),0.05);
+    letter-spacing: 1px;
+    transition: background 0.15s, box-shadow 0.15s;
+  }
+
+  .challenge a.dl-btn:hover {
+    background: rgba(var(--accent-rgb),0.12);
+    box-shadow: 0 0 12px rgba(var(--accent-rgb),0.2);
+  }
+
+  .challenge a.dl-btn::before { content: '▶ '; font-size: 9px; }
+
+  /* ── FOOTER ── */
+  .footer {
+    text-align: center;
+    margin-top: 60px;
+    font-family: var(--mono);
+    font-size: 11px;
+    color: rgba(200,214,229,0.2);
+    letter-spacing: 2px;
+  }
+
+  /* ── ANIMATIONS ── */
+  @keyframes flicker {
+    0%, 95%, 100% { opacity: 1; }
+    96% { opacity: 0.4; }
+    97% { opacity: 1; }
+    98% { opacity: 0.3; }
+    99% { opacity: 0.9; }
+  }
+
+  @keyframes glow-pulse {
+    0%, 100% { text-shadow: 0 0 20px rgba(0,245,255,0.6), 0 0 60px rgba(0,245,255,0.2); }
+    50% { text-shadow: 0 0 30px rgba(0,245,255,0.9), 0 0 80px rgba(0,245,255,0.4); }
+  }
+
+  .banner h1 { animation: glow-pulse 3s ease-in-out infinite; }
+</style>
 </head>
 <body>
+<div class="wrapper">
 
-<h1>7CTF 2026</h1>
-<p>welcome to digital suffering 😹</p>
+  <!-- ══ BANNER ══ -->
+  <div class="banner">
+    <div class="banner-meme">[ DIGITAL SUFFERING AWAITS ]</div>
+    <pre class="ascii-art">
+ ██████╗ ████████╗ ██████╗███████╗
+██╔════╝ ╚══██╔══╝██╔════╝██╔════╝
+███████╗    ██║   ██║     █████╗  
+╚════██║    ██║   ██║     ██╔══╝  
+███████║    ██║   ╚██████╗██║     
+╚══════╝    ╚═╝    ╚═════╝╚═╝     
+    </pre>
+    <div class="banner-year">2 0 2 6</div>
+    <div class="banner-tagline">:: forensics edition :: welcome to digital suffering 😹 ::</div>
+    <div class="badge-row">
+      <span class="badge badge-g">FORENSICS</span>
+      <span class="badge badge-c">STEGANOGRAPHY</span>
+      <span class="badge badge-p">CRYPTOGRAPHY</span>
+      <span class="badge badge-g">LOG ANALYSIS</span>
+    </div>
+  </div>
 
-<h2>🏆 Scoreboard</h2>
+  <!-- ══ SCOREBOARD ══ -->
+  <div class="section-title">SCOREBOARD</div>
+  <div class="scoreboard-wrap">
+    <iframe
+      src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWSfO61jreiszZ5Wwd5McR_Y39wh2sa3YfKa54RzdLNe8jFn6eY-rFXRIPHyDX48OAK5_2oHrORoxM/pubhtml?gid=1209270174&single=true"
+      title="Scoreboard">
+    </iframe>
+  </div>
 
-<iframe
-src="https://docs.google.com/spreadsheets/d/e/2PACX-1vQWSfO61jreiszZ5Wwd5McR_Y39wh2sa3YfKa54RzdLNe8jFn6eY-rFXRIPHyDX48OAK5_2oHrORoxM/pubhtml?gid=1209270174&single=true"
-width="100%"
-height="500"
-style="border:none;border-radius:10px;">
-</iframe>
+  <!-- ══ SUBMIT ══ -->
+  <div class="section-title">SUBMIT FLAG</div>
+  <div class="submit-card">
+    <p>
+      <span>Submit Flag &amp; Writeup</span>
+      submit flag disini dan jangan lupa writeup-nya wok 🗣️
+    </p>
+    <a class="btn-submit" href="https://docs.google.com/forms/d/e/1FAIpQLSdNIzrxeBWnqIb_75agGHA-3fMTtVRfU6_sPEbuF9B07z2auw/viewform?usp=sharing&ouid=115329041700883755188" target="_blank">
+      SUBMIT NOW →
+    </a>
+  </div>
 
-<div class="challenge">
-  <h2>SUBMIT YOUR FLAG & WRITEUP HERE!!</h2>
-  <p>
-    submit flag disini dan jangan lupa writeup-nya wok
-  </p>
-  <a href="https://docs.google.com/forms/d/e/1FAIpQLSdNIzrxeBWnqIb_75agGHA-3fMTtVRfU6_sPEbuF9B07z2auw/viewform?usp=sharing&ouid=115329041700883755188">
-    Klik ini!!
-  </a>
+  <!-- ══ CHALLENGES ══ -->
+  <div class="section-title">CHALLENGES</div>
+  <div class="challenges-grid">
+
+    <div class="challenge pts-50">
+      <div class="challenge-num">#01</div>
+      <div class="challenge-header">
+        <h2>Intern Senior Lagi Masak Kode</h2>
+        <span class="pts-badge">50 PTS</span>
+      </div>
+      <p>Rekan-rekan setanah air dan se-IP Address,<br>
+      Barusan ada anak magang yang mau nge-print "Hello World" tapi entah kenapa server malah meledak dan keluar output file .bin aneh ini. Dia bilang dia dapet pencerahan setelah minum kopi saset ke-15 hari ini.<br><br>
+      Katanya, file ini adalah "Core Memory" dari mesin yang sudah mencapai enlightenment. Tolong terjemahkan apa yang dibisikkan oleh mesin ini sebelum kita kena pecat massal oleh bos.<br><br>
+      Format flag: 7CTF{...}</p>
+    </div>
+
+    <div class="challenge pts-75">
+      <div class="challenge-num">#02</div>
+      <div class="challenge-header">
+        <h2>PDF Certified Hood Classic</h2>
+        <span class="pts-badge">75 PTS</span>
+      </div>
+      <p>Rekan-rekan investigator digital,<br>
+      Kami menerima file PDF dari divisi "desain" yang katanya sudah diamankan menggunakan teknologi sensor tingkat NASA. Tapi entah kenapa: ada blok hitam aneh di beberapa bagian, pas di-select all malah muncul kalimat misterius, dan anak magang bilang: "bang... kayaknya PDF-nya ngomong sama saya"<br><br>
+      Kami butuh bantuan kalian sebelum file ini dikirim ke grup kantor dan jadi bahan roasting nasional.<br><br>
+      Format flag: 7CTF{.....}</p>
+      <a class="dl-btn" href="challenges/PDF Certified Hood Classic/Laporan_Insiden_Server_Final.pdf">DOWNLOAD CHALLENGE</a>
+    </div>
+
+    <div class="challenge pts-100">
+      <div class="challenge-num">#03</div>
+      <div class="challenge-header">
+        <h2>JPEG Rasa ZIP Password 7 Lapis</h2>
+        <span class="pts-badge">100 PTS</span>
+      </div>
+      <p>Halo para digital forensik enjoyer,<br>
+      Kami menemukan sebuah file gambar dari laptop anak divisi keamanan yang katanya: "udah aman bang, udah saya encrypt." Setelah dibuka… cuma gambar gorilla. Tidak ada teks. Tidak ada hint. Tidak ada harga diri.<br><br>
+      Tapi kami yakin ada sesuatu yang disembunyikan di dalam file ini. Anak magang terakhir yang mencoba investigasi sekarang ngomongnya: "metadata never lies…"<br><br>
+      Format flag: 7CTF{...}</p>
+      <a class="dl-btn" href="challenges/JPEG Rasa ZIP Password 7 Lapis/hehe.jpeg">DOWNLOAD CHALLENGE</a>
+    </div>
+
+    <div class="challenge pts-125">
+      <div class="challenge-num">#04</div>
+      <div class="challenge-header">
+        <h2>SOC Analyst Jam 3 Pagi</h2>
+        <span class="pts-badge">125 PTS</span>
+      </div>
+      <p>Tim keamanan menemukan file log mencurigakan dari server kantor. Kata anak magang: "tenang bang, cuma log biasa." Lima menit kemudian: CPU usage 100%, Wireshark dibuka, kopi habis 2 liter, dan satu orang mulai ngomong: "base64 tuh bahasa universal penderitaan."<br><br>
+      Kami yakin ada pesan tersembunyi di dalam log tersebut.<br>
+      Hint dari pelaku: "decode aja dulu bro."<br><br>
+      Format flag: 7CTF{...}</p>
+      <a class="dl-btn" href="challenges/SOC Analyst Jam 3 Pagi/network_log.txt">DOWNLOAD CHALLENGE</a>
+    </div>
+
+    <div class="challenge pts-150">
+      <div class="challenge-num">#05</div>
+      <div class="challenge-header">
+        <h2>Bro Corrupt Lagi Bro</h2>
+        <span class="pts-badge">150 PTS</span>
+      </div>
+      <p>Tim digital forensik menerima file misterius bernama: <em>apa hayo</em><br><br>
+      Pas dibuka: tidak bisa, file format unknown, Windows bilang "How do you want to open this file?", satu anggota tim langsung uninstall hidup.<br><br>
+      Namun setelah diperiksa lebih dalam… ada sesuatu yang mencurigakan di bagian header file. Anak magang berkata: "bang ini kayak JPEG yang habis ketabrak dump truck." Mungkin filenya tidak rusak… mungkin cuma identitasnya yang dipalsukan.<br><br>
+      Format flag: 7CTF{...}</p>
+      <a class="dl-btn" href="challenges/Bro Corrupt Lagi Bro/apa hayo">DOWNLOAD CHALLENGE</a>
+    </div>
+
+    <div class="challenge pts-175">
+      <div class="challenge-num">#06</div>
+      <div class="challenge-header">
+        <h2>Intern Forensik vs PDF Dari Neraka</h2>
+        <span class="pts-badge">175 PTS</span>
+      </div>
+      <p>Rekan-rekan seperjuangan dan seper-WiFi-an,<br>
+      Divisi keamanan menemukan sebuah PDF mencurigakan dari laptop mantan intern yang menghilang setelah berkata: "metadata itu cuma mitos bang."<br><br>
+      Isi PDF terlihat normal. Tapi: ada beberapa blok hitam random, pas di-select muncul teks aneh, dan setelah investigasi lebih lanjut… ternyata ada payload tersembunyi di dalam gambar yang disisipkan di PDF. HRD sudah panik. Bos sudah mengetik: "besok meeting."<br><br>
+      Format flag: 7CTF{...}</p>
+      <a class="dl-btn" href="challenges/Intern Forensik vs PDF Dari Neraka/IMPORTANT_READ_ME_OR_DIE.pdf">DOWNLOAD CHALLENGE</a>
+    </div>
+
+    <div class="challenge pts-200">
+      <div class="challenge-num">#07</div>
+      <div class="challenge-header">
+        <h2>Log Server Kok Jadi PNG?</h2>
+        <span class="pts-badge">200 PTS</span>
+      </div>
+      <p>Tim SOC menemukan file log misterius dari server production setelah seseorang menjalankan: <code style="color:var(--neon-pink);font-family:var(--mono);font-size:12px;">sudo rm -rf /</code> …di server yang salah.<br><br>
+      File log tersebut terlihat aneh: isinya random karakter, katanya harus di-decode, setelah didecode malah jadi gambar, dan gambar itu sendiri ternyata masih menyimpan "pesan terakhir" dari server.<br><br>
+      Anak magang yang pertama kali nemu file ini sekarang cuma duduk sambil menatap terminal kosong.<br><br>
+      Format flag: 7CTF{...}</p>
+      <a class="dl-btn" href="challenges/Log Server Kok Jadi PNG?/server.log">DOWNLOAD CHALLENGE</a>
+    </div>
+
+    <div class="challenge pts-225">
+      <div class="challenge-num">#08</div>
+      <div class="challenge-header">
+        <h2>Security Through Obscurity Any% Speedrun</h2>
+        <span class="pts-badge">225 PTS</span>
+      </div>
+      <p>Divisi IT menemukan file aneh bernama: <em>definitely_not_secret.bin</em><br><br>
+      Kata developer yang membuatnya: "tenang bang, filenya udah saya obfuscate." Setelah dicek: format file tidak jelas, dibuka pakai image viewer gagal, dibuka pakai text editor isinya alien language, dan satu orang berkata: "ini pasti karya orang yang percaya rename file = encryption"<br><br>
+      Tim forensik yakin file ini sebenarnya menyimpan gambar rahasia. Tapi entah kenapa isi gambarnya juga terasa mencurigakan…<br><br>
+      Format flag: 7CTF{...}</p>
+      <a class="dl-btn" href="challenges/Security Through Obscurity Any% Speedrun/definitely_not_secret.bin">DOWNLOAD CHALLENGE</a>
+    </div>
+
+    <div class="challenge pts-250">
+      <div class="challenge-num">#09</div>
+      <div class="challenge-header">
+        <h2>Anak Magang vs Teknologi Enkripsi PowerPoint</h2>
+        <span class="pts-badge">250 PTS</span>
+      </div>
+      <p>Divisi keamanan menerima file: <em>secure_notes.pdf</em><br><br>
+      Kata pembuatnya: "udah aman bang, udah saya sensor pakai kotak item." Setelah dibuka: ada banyak blok hitam, layout PDF berantakan, dan vibe-nya kayak tugas kelompok jam 23:59.<br><br>
+      Tapi yang paling mencurigakan: saat teks di-copy… muncul karakter random panjang yang katanya "tidak penting". Anak forensik senior langsung berkata: "nah ini pasti dosa."<br><br>
+      Format flag: 7CTF{...}</p>
+      <a class="dl-btn" href="challenges/Anak Magang vs Teknologi Enkripsi PowerPoint/DOKUMEN_SANGAT_RAHASIA_NEGARA.pdf">DOWNLOAD CHALLENGE</a>
+    </div>
+
+    <div class="challenge pts-300">
+      <div class="challenge-num">#10</div>
+      <div class="challenge-header">
+        <h2>ZIP Tapi Malah Jadi Ritual Forensik</h2>
+        <span class="pts-badge">300 PTS</span>
+      </div>
+      <p>Tim IT menemukan archive mencurigakan bernama: <em>backup_final_v2_REAL.zip</em><br><br>
+      Kata orang yang membuatnya: "password-nya aman kok bang." Setelah dicoba: password salah terus, hint tidak membantu, dan archive berisi file .bin random yang tidak bisa dibuka.<br><br>
+      Satu-satunya petunjuk hanyalah file <em>note.txt</em> yang isinya: "everything you need is already inside."<br><br>
+      Anak magang yang pertama investigasi file ini sekarang kerja jadi barista.<br><br>
+      Format flag: 7CTF{...}</p>
+      <a class="dl-btn" href="challenges/ZIP Tapi Malah Jadi Ritual Forensik/backup_final_v2_REAL.zip">DOWNLOAD CHALLENGE</a>
+    </div>
+
+  </div>
+
+  <div class="footer">
+    &lt;/7CTF 2026&gt; :: good luck, have fun, don't cry (too much)
+  </div>
 
 </div>
-
-<div class="challenge">
-  <h2>[50 pts] Intern Senior Lagi Masak Kode</h2>
-  <p>Rekan-rekan setanah air dan se-IP Address,<br>
-  Barusan ada anak magang yang mau nge-print "Hello World" tapi entah kenapa server malah meledak dan keluar output file .bin aneh ini. Dia bilang dia dapet pencerahan setelah minum kopi saset ke-15 hari ini.<br><br>
-
-  Katanya, file ini adalah "Core Memory" dari mesin yang sudah mencapai enlightenment.<br>
-  Tolong terjemahkan apa yang dibisikkan oleh mesin ini sebelum kita kena pecat massal oleh bos.<br><br>
-
-  Format flag:<br>
-  7CTF{...}</p>
-
-  
-</div>
-
-<div class="challenge">
-  <h2>[75 pts] PDF Certified Hood Classic</h2>
-  <p>Rekan-rekan investigator digital,<br>
-  Kami menerima file PDF dari divisi “desain” yang katanya sudah diamankan menggunakan teknologi sensor tingkat NASA.<br>
-  Tapi entah kenapa:<br><br>
-
-  ada blok hitam aneh di beberapa bagian<br>
-  pas di-select all malah muncul kalimat misterius<br>
-  dan anak magang bilang:<br><br>
-
-  “bang... kayaknya PDF-nya ngomong sama saya”<br><br>
-
-  Kami butuh bantuan kalian sebelum file ini dikirim ke grup kantor dan jadi bahan roasting nasional.<br><br>
-
-  Format flag:<br>
-  7CTF{.....}</p>
-
-  <a href="challenges/PDF Certified Hood Classic/Laporan_Insiden_Server_Final.pdf">
-    Download Challenge
-  </a>
-</div>
-
-<div class="challenge">
-  <h2>[100 pts] JPEG Rasa ZIP Password 7 Lapis</h2>
-  <p>Halo para digital forensik enjoyer,<br>
-  Kami menemukan sebuah file gambar dari laptop anak divisi keamanan yang katanya:<br><br>
-  “udah aman bang, udah saya encrypt.”<br><br>
-  Setelah dibuka…<br>
-  cuma gambar gorilla.<br>
-  Tidak ada teks.<br>
-  Tidak ada hint.<br>
-  Tidak ada harga diri.<br>
-  Tapi kami yakin ada sesuatu yang disembunyikan di dalam file ini.<br>
-  Anak magang terakhir yang mencoba investigasi sekarang ngomongnya:<br><br>
-  “metadata never lies…”<br><br>
-
-  Tolong cari hidden payload dan ekstrak isi rahasianya sebelum bos mengadakan meeting “tanpa marah”.<br><br>
-
-  Format flag:<br>
-  7CTF{...}</p>
-
-  <a href="challenges/JPEG Rasa ZIP Password 7 Lapis/hehe.jpeg">
-    Download Challenge
-  </a>
-</div>
-
-<div class="challenge">
-  <h2>[125 pts] SOC Analyst Jam 3 Pagi</h2>
-  <p>Tim keamanan menemukan file log mencurigakan dari server kantor.<br>
-  Kata anak magang:<br><br>
-  
-  “tenang bang, cuma log biasa.”<br><br>
-
-  Lima menit kemudian:<br><br>
-
-  CPU usage 100%<br>
-  Wireshark dibuka<br>
-  kopi habis 2 liter<br>
-  dan satu orang mulai ngomong:<br><br>
-  “base64 tuh bahasa universal penderitaan.”<br><br>
-  Kami yakin ada pesan tersembunyi di dalam log tersebut.<br>
-
-  Hint dari pelaku:<br><br>
-  “decode aja dulu bro.”<br><br>
-
-  Format flag:<br>
-  7CTF{...}</p>
-
-  <a href="challenges/SOC Analyst Jam 3 Pagi/network_log.txt">
-    Download Challenge
-  </a>
-</div>
-
-<div class="challenge">
-  <h2>[150 pts] Bro Corrupt Lagi Bro</h2>
-  <p>Tim digital forensik menerima file misterius bernama:<br><br>
-
-  apa hayo<br><br>
-
-  Pas dibuka:<br><br>
-  tidak bisa<br>
-  file format unknown<br>
-  Windows bilang “How do you want to open this file?”<br>
-  satu anggota tim langsung uninstall hidup<br><br>
-
-  Namun setelah diperiksa lebih dalam…<br>
-  ada sesuatu yang mencurigakan di bagian header file.<br>
-
-  Anak magang berkata:<br><br>
-  “bang ini kayak JPEG yang habis ketabrak dump truck.”<br><br>
-
-  Mungkin filenya tidak rusak…<br>
-  mungkin cuma identitasnya yang dipalsukan.<br><br>
-
-  Format flag:<br>
-  7CTF{...}</p>
-
-  <a href="challenges/Bro Corrupt Lagi Bro/apa hayo">
-    Download Challenge
-  </a>
-</div>
-
-<div class="challenge">
-  <h2>[175 pts] Intern Forensik vs PDF Dari Neraka</h2>
-  <p>Rekan-rekan seperjuangan dan seper-WiFi-an,<br>
-  Divisi keamanan menemukan sebuah PDF mencurigakan dari laptop mantan intern yang menghilang setelah berkata:<br><br>
-
-  “metadata itu cuma mitos bang.”<br><br>
-
-  Isi PDF terlihat normal.<br>
-  Tapi:<br><br>
-
-  ada beberapa blok hitam random<br>
-  pas di-select muncul teks aneh<br>
-  dan setelah investigasi lebih lanjut…<br>
-  ternyata ada payload tersembunyi di dalam gambar yang disisipkan di PDF<br><br>
-
-  HRD sudah panik.<br>
-  Bos sudah mengetik:<br><br>
-
-  “besok meeting.”<br><br>
-
-  Tolong bongkar rahasia file ini sebelum seluruh divisi IT dijadikan tumbal sprint berikutnya.<br><br>
-
-  Format flag:<br>
-  7CTF{...}</p>
-
-  <a href="challenges/Intern Forensik vs PDF Dari Neraka/IMPORTANT_READ_ME_OR_DIE.pdf">
-    Download Challenge
-  </a>
-</div>
-
-<div class="challenge">
-  <h2>[200 pts] Log Server Kok Jadi PNG?</h2>
-  <p>Tim SOC menemukan file log misterius dari server production setelah seseorang menjalankan:<br><br>
-
-  sudo rm -rf /<br><br>
-
-  ...di server yang salah.<br>
-  File log tersebut terlihat aneh:<br><br>
-
-  isinya random karakter<br>
-  katanya harus di-decode<br>
-  setelah didecode malah jadi gambar<br>
-  dan gambar itu sendiri ternyata masih menyimpan “pesan terakhir” dari server<br><br>
-
-  Anak magang yang pertama kali nemu file ini sekarang cuma duduk sambil menatap terminal kosong.<br><br>
-
-  Format flag:<br>
-  7CTF{...}</p>
-
-  <a href="challenges/Log Server Kok Jadi PNG?/server.log">
-    Download Challenge
-  </a>
-</div>
-
-<div class="challenge">
-  <h2>[225 pts] Security Through Obscurity Any% Speedrun</h2>
-  <p>Divisi IT menemukan file aneh bernama:<br><br>
-
-  definitely_not_secret.bin<br><br>
-
-  Kata developer yang membuatnya:<br><br>
-  “tenang bang, filenya udah saya obfuscate.”<br><br>
-  Setelah dicek:<br><br>
-
-  format file tidak jelas<br>
-  dibuka pakai image viewer gagal<br>
-  dibuka pakai text editor isinya alien language<br>
-  dan satu orang berkata:<br><br>
-
-  “ini pasti karya orang yang percaya rename file = encryption”<br><br>
-  Tim forensik yakin file ini sebenarnya menyimpan gambar rahasia.<br>
-  Tapi entah kenapa isi gambarnya juga terasa mencurigakan…<br><br>
-
-  Format flag:<br>
-  7CTF{...}</p>
-
-  <a href="challenges/Security Through Obscurity Any% Speedrun/definitely_not_secret.bin">
-    Download Challenge
-  </a>
-</div>
-
-<div class="challenge">
-  <h2>[250 pts] Anak Magang vs Teknologi Enkripsi PowerPoint</h2>
-  <p>Divisi keamanan menerima file:<br><br>
-
-  secure_notes.pdf<br><br>
-
-  Kata pembuatnya:<br><br>
-  “udah aman bang, udah saya sensor pakai kotak item.”<br><br>
-  Setelah dibuka:<br><br>
-
-  ada banyak blok hitam<br>
-  layout PDF berantakan<br>
-  dan vibe-nya kayak tugas kelompok jam 23:59<br>
-
-  Tapi yang paling mencurigakan:<br><br>
-  saat teks di-copy…<br>
-  muncul karakter random panjang yang katanya “tidak penting”.<br> 
-  Anak forensik senior langsung berkata:<br><br>
-  “nah ini pasti dosa.”<br><br>
-
-  Format flag:<br>
-  7CTF{...}</p>
-
-  <a href="challenges/Anak Magang vs Teknologi Enkripsi PowerPoint/DOKUMEN_SANGAT_RAHASIA_NEGARA.pdf">
-    Download Challenge
-  </a>
-</div>
-
-<div class="challenge">
-  <h2>[300 pts] ZIP Tapi Malah Jadi Ritual Forensik</h2>
-  <p>Tim IT menemukan archive mencurigakan bernama:<br><br>
-
-  backup_final_v2_REAL.zip<br><br>
-
-  Kata orang yang membuatnya:<br><br>
-  “password-nya aman kok bang.”<br><br>
-  Setelah dicoba:<br><br>
-
-  password salah terus<br>
-  hint tidak membantu<br>
-  dan archive berisi file .bin random yang tidak bisa dibuka<br>
-
-  Satu-satunya petunjuk hanyalah file:<br><br>
-  note.txt<br><br>
-
-  yang isinya:<br><br>
-  “everything you need is already inside.”<br><br>
-
-  Anak magang yang pertama investigasi file ini sekarang kerja jadi barista.<br><br>
-
-  Format flag:<br>
-  7CTF{...}</p>
-
-  <a href="challenges/ZIP Tapi Malah Jadi Ritual Forensik/backup_final_v2_REAL.zip">
-    Download Challenge
-  </a>
-</div>
-
 </body>
 </html>
