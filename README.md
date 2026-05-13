@@ -4,6 +4,9 @@
 > — anonymous intern, sebelum server meledak
 
 ---
+## 🌐 Web
+👉 https://rzfauzan.github.io/7CTF-Forensic/
+---
 
 ## 😹 About
 
